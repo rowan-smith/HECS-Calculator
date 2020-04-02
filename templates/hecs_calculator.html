@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="../static/CSS/site_styles.css">
+    <meta charset="UTF-8">
+    <title>
+        Hecs Calculator
+    </title>
+</head>
+<body>
+    <div class="center">
+        <h1>Hecs Calculator</h1>
+        <form method="POST">
+            {{ form.csrf_token }}
+            {{ form.annual_income(class_="form-control", placeholder="Annual Income") }}
+            <br>
+            {{ form.hecs_debt(class_="form-control",placeholder="Hecs Debt") }}
+            <br>
+            {{ form.weekly_voluntary_repayments(class_="form-control",placeholder="Weekly Voluntary Repayments") }}
+            <br>
+            {{ form.calculate }}
+        </form>
+    </div>
+</body>
+</html>
