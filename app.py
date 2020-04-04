@@ -19,10 +19,5 @@ app.config['SECRET_KEY'] = SECRET_KEY
 def home_page():
     return 'Home Page'
 
-#
-# @app.route('/hecs_calculator')
-# def hecs_calculator():
-#     return 'Hecs Calculator Page'
 
-
-app.run()
+app.run(debug=False, host='192.168.0.249')
