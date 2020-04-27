@@ -8,13 +8,6 @@ blueprint_name = "hecs_calculator"
 
 hecs_calculator = Blueprint(blueprint_name, __name__)
 
-options = Options()
-# Running headless true decreases performance for some reason, probably lets page be unloaded unlike non-headless
-options.headless = False
-# Executed as a script, the driver should be in `PATH` (root of directory)
-web_driver = webdriver.Chrome(options=options)
-web_driver.get("https://www.paycalculator.com.au/")
-
 
 @hecs_calculator.route(f'/{blueprint_name}', methods=['GET', 'POST'])
 def _hecs_calculator():
@@ -35,7 +28,7 @@ def _hecs_calculator():
         annual_voluntary_payment = form.weekly_voluntary_repayments.data * 52
 
         # Amount of money added onto the debt due to indexation
-        annual_mandatory_hecs_repayment = get_annual_compulsory_hecs(annual_income, web_driver)
+        annual_mandatory_hecs_repayment = get_annual_compulsory_hecs(annual_income)
 
         # Calculate num of years with voluntary repayments and resulting HECS debt
         num_voluntary_years, total_voluntary_index = get_num_voluntary_years(hecs_debt, index_rate,
@@ -74,22 +67,29 @@ def _hecs_calculator():
                            display_output=display_output)
 
 
-def get_annual_compulsory_hecs(annual_income, driver):
+def get_annual_compulsory_hecs(annual_income):
     print("2")
+    options = Options()
+    # Running headless true decreases performance for some reason, probably lets page be unloaded unlike non-headless
+    options.headless = False
+    # Executed as a script, the driver should be in `PATH` (root of directory)
+    web_driver = webdriver.Chrome(options=options)
+    web_driver.get("https://www.paycalculator.com.au/")
     # Enter annual income into website
-    driver.find_element_by_name("income").clear()
-    driver.find_element_by_name("income").send_keys(annual_income)
-    # Turn on hecs repayment calculation
-    if driver.find_element_by_name("HELP").is_selected():
+    web_driver.find_element_by_name("income").clear()
+    web_driver.find_element_by_name("income").send_keys(annual_income)
+    # Turn on hecs repayment calculation (check if it's already selected first)
+    if web_driver.find_element_by_name("HELP").is_selected():
         pass
     else:
-        driver.find_element_by_name("HELP").click()
+        web_driver.find_element_by_name("HELP").click()
     # Get minimum hecs repayment, replace useless characters, convert to integer
-    mandatory_hecs = driver.find_element_by_xpath("//*[@id='other_annually']").text
+    mandatory_hecs = web_driver.find_element_by_xpath("//*[@id='other_annually']").text
     chars_to_replace = ["$", ","]
     for char in chars_to_replace:
         mandatory_hecs = mandatory_hecs.replace(char, "")
     mandatory_hecs = float(mandatory_hecs)
+    web_driver.close()
     return mandatory_hecs
 
 
