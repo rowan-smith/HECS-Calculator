@@ -15,9 +15,10 @@ app.register_blueprint(hecs_calculator)
 app.config['SECRET_KEY'] = SECRET_KEY
 
 
-@app.route('/home')
+@app.route('/')
 def home_page():
     return 'Home Page'
 
 
-app.run(debug=False, host='192.168.0.249')
+if __name__ == '__main__':
+    app.run()
