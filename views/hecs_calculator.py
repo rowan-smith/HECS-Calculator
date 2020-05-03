@@ -71,9 +71,10 @@ def _hecs_calculator():
 
 def get_annual_compulsory_hecs(annual_income):
     print("2 - Get Web Data")
-    options = Options()
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless")
+    options.add_argument("--disable-gpu")
 
-    options.headless = True
     # Executed as a script, the driver should be in `PATH` (root of directory)
     web_driver = webdriver.Chrome(options=options)
 
