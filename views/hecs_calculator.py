@@ -1,3 +1,5 @@
+import datetime
+
 from flask import render_template, Blueprint
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -13,10 +15,10 @@ hecs_calculator = Blueprint(blueprint_name, __name__)
 def _hecs_calculator():
     form = HecsDebtForm()
     display_strings = []
-    display_output = False
+    display_blank_output = False
 
     if form.validate_on_submit():
-        print("1")
+        print("1 - Start Calculation Process")
         # Clear display strings and set index rate
         display_strings = []
         index_rate = 0.021
@@ -43,7 +45,7 @@ def _hecs_calculator():
 
         # Calculate num of years and months to repay debt for voluntary and involuntary payment
         voluntary_years, voluntary_months, involuntary_years, involuntary_months \
-            = get_repayment_lengths(num_involuntary_years, num_voluntary_years)
+            = get_readable_repayment_lengths(num_involuntary_years, num_voluntary_years)
 
         # Append all strings that need to be displayed to the user to a list
         display_strings.append(f"${annual_income:,}")
@@ -62,27 +64,24 @@ def _hecs_calculator():
         display_strings.append(f"${annual_voluntary_payment / 52} weekly payments")
         display_strings.append(f"(${annual_voluntary_payment:,.2f} Annually)")
 
-        display_output = True
+        display_blank_output = True
     return render_template(f"{blueprint_name}.html", form=form, display_strings=display_strings,
-                           display_output=display_output)
+                           display_output=display_blank_output)
 
 
 def get_annual_compulsory_hecs(annual_income):
-    print("2")
+    print("2 - Get Web Data")
     options = Options()
-    # Running headless true decreases performance for some reason, probably lets page be unloaded unlike non-headless
-    options.headless = False
+
+    options.headless = True
     # Executed as a script, the driver should be in `PATH` (root of directory)
     web_driver = webdriver.Chrome(options=options)
-    web_driver.get("https://www.paycalculator.com.au/")
-    # Enter annual income into website
-    web_driver.find_element_by_name("income").clear()
-    web_driver.find_element_by_name("income").send_keys(annual_income)
-    # Turn on hecs repayment calculation (check if it's already selected first)
-    if web_driver.find_element_by_name("HELP").is_selected():
-        pass
-    else:
-        web_driver.find_element_by_name("HELP").click()
+
+    # Go to Pay calculator page permalink for entered income
+    current_time = datetime.datetime.now()
+    # Permalink format: AnnualIncome|AnnualCycle|FinancialYear|SuperRate|DEFAULT_VALUES|Tick Hecs box
+    web_driver.get(f"https://www.paycalculator.com.au/#{annual_income}|0|{current_time.year}|9.5|5,0,7.5,38,52|000100")
+
     # Get minimum hecs repayment, replace useless characters, convert to integer
     mandatory_hecs = web_driver.find_element_by_xpath("//*[@id='other_annually']").text
     chars_to_replace = ["$", ","]
@@ -94,7 +93,7 @@ def get_annual_compulsory_hecs(annual_income):
 
 
 def get_num_voluntary_years(hecs_debt, index_rate, annual_voluntary_payment, mandatory_hecs_repayment):
-    print("3")
+    print("3 - Calculate voluntary years")
     calculated_num_years = 1
     annual_index_amounts = []
 
@@ -120,7 +119,7 @@ def get_num_voluntary_years(hecs_debt, index_rate, annual_voluntary_payment, man
 
 
 def get_num_involuntary_years(hecs_debt, index_rate, mandatory_hecs_repayment):
-    print("4")
+    print("4 - Calculate involuntary years")
     calculated_num_years = 1
     annual_index_amounts = []
 
@@ -143,8 +142,8 @@ def get_num_involuntary_years(hecs_debt, index_rate, mandatory_hecs_repayment):
     return calculated_num_years, sum(annual_index_amounts)
 
 
-def get_repayment_lengths(num_involuntary_years, num_voluntary_years):
-    print("5")
+def get_readable_repayment_lengths(num_involuntary_years, num_voluntary_years):
+    print("5 - Convert calculated dates to readable format")
     voluntary_years = int(num_voluntary_years)
     voluntary_months = int((num_voluntary_years % 1) * 12)
     involuntary_years = int(num_involuntary_years)
