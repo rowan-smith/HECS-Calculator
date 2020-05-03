@@ -71,26 +71,27 @@ def _hecs_calculator():
 
 def get_annual_compulsory_hecs(annual_income):
     print("2 - Get Web Data")
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless")
-    options.add_argument("--disable-gpu")
-
-    # Executed as a script, the driver should be in `PATH` (root of directory)
-    web_driver = webdriver.Chrome(options=options)
-
-    # Go to Pay calculator page permalink for entered income
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-gpu")
+    web_driver = webdriver.Chrome(options=chrome_options)
     current_time = datetime.datetime.now()
-    # Permalink format: AnnualIncome|AnnualCycle|FinancialYear|SuperRate|DEFAULT_VALUES|Tick Hecs box
-    web_driver.get(f"https://www.paycalculator.com.au/#{annual_income}|0|{current_time.year}|9.5|5,0,7.5,38,52|000100")
 
-    # Get minimum hecs repayment, replace useless characters, convert to integer
-    mandatory_hecs = web_driver.find_element_by_xpath("//*[@id='other_annually']").text
-    chars_to_replace = ["$", ","]
-    for char in chars_to_replace:
-        mandatory_hecs = mandatory_hecs.replace(char, "")
-    mandatory_hecs = float(mandatory_hecs)
-    web_driver.close()
-    return mandatory_hecs
+    try:
+        # Go to Pay calculator page permalink for entered income
+        # Permalink format: AnnualIncome|AnnualCycle|FinancialYear|SuperRate|DEFAULT_VALUES|Tick Hecs box
+        web_driver.get(
+            f"https://www.paycalculator.com.au/#{annual_income}|0|{current_time.year}|9.5|5,0,7.5,38,52|000100")
+
+        # Get minimum hecs repayment, replace useless characters, convert to integer
+        mandatory_hecs = web_driver.find_element_by_xpath("//*[@id='other_annually']").text
+        chars_to_replace = ["$", ","]
+        for char in chars_to_replace:
+            mandatory_hecs = mandatory_hecs.replace(char, "")
+        mandatory_hecs = float(mandatory_hecs)
+        return mandatory_hecs
+    finally:
+        web_driver.quit()
 
 
 def get_num_voluntary_years(hecs_debt, index_rate, annual_voluntary_payment, mandatory_hecs_repayment):
