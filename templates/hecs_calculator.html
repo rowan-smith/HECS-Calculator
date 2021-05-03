@@ -7,7 +7,7 @@
 var timeoutVar;
 
 function myFunction() {
-        timeoutVar = setTimeout(showPage, 3000);
+        timeoutVar = setTimeout(showPage, 100);
 }
 
 function showPage() {
@@ -51,7 +51,7 @@ function showPage() {
 
         <br>
         <!--  Break the stats down for the user  -->
-        <p class="center_text">It is <strong>{{ display_strings[6] }}</strong> and <strong>{{ display_strings[7] }}</strong> to make <strong>{{ display_strings[8] }}</strong> {{ display_strings[9] }}</p>
+        <p class="center_text">It is approximately <strong>{{ display_strings[6] }}</strong> and <strong>{{ display_strings[7] }}</strong> to make <strong>{{ display_strings[8] }}</strong> {{ display_strings[9] }}</p>
         {% endif %}
     </div>
 </div>
