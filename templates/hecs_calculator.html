@@ -35,7 +35,8 @@
 <div id="content">
     <div class="center">
         <h1 class="center_text">Hecs Repayment Calculator</h1>
-        <form autocomplete="off" method="POST" class="center_text">
+<!--        <form autocomplete="off" method="POST" class="center_text">-->
+        <form method="POST" class="center_text">
             {{ form.csrf_token }}
             {{ form.annual_income(class_="form-control", placeholder="Annual Income") }}
             <br>
