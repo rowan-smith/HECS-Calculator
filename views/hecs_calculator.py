@@ -2,8 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 from flask import render_template, Blueprint
 
-from UserHecsCalculations import UserHecsTax
 from forms import HecsDebtForm
+from static.Helper_Classes.UserHecsCalculations import UserHecsTax
 
 ATO_HELP_THRESHOLD_URL = "https://www.ato.gov.au/Rates/HELP,-TSL-and-SFSS-repayment-thresholds-and-rates/"
 ATO_HELP_INDEXATION_URL = "https://www.ato.gov.au/Rates/Study-and-training-loan-indexation-rates/"
@@ -19,7 +19,8 @@ hecs_calculator = Blueprint(blueprint_name, __name__)
 # 2.5) Find a way to display this to the user without just showing an error
 # 3) Class more stuff where appropriate
 # 4) Re-vamp the HTML / CSS to make the end user page be nicer and easier to understand
-# 5) Add a link on the home page that takes you to the HECS calculator
+# 5) Add a link on the home page that takes you to the HECS calculator = DONE
+# 6) Validate values entered into inputs (No negatives, nothing below bracket min?, is only numbers)
 
 
 @hecs_calculator.route(f'/{blueprint_name}', methods=['GET', 'POST'])

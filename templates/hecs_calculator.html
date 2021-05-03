@@ -1,21 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="apple-touch-icon" sizes="180x180" href="../static/Favicon_Images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../static/Favicon_Images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../static/Favicon_Images/favicon-16x16.png">
+    <link rel="manifest" href="../static/Favicon_Images/site.webmanifest">
+    <link rel="mask-icon" href="../static/Favicon_Images/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
     <link rel="stylesheet" href="../static/CSS/site_styles.css">
 
     <script>
-var timeoutVar;
+        var timeoutVar;
 
-function myFunction() {
-        timeoutVar = setTimeout(showPage, 100);
-}
+        function myFunction() {
+                timeoutVar = setTimeout(showPage, 100);
+        }
 
-function showPage() {
-  document.getElementById("content").style.display = "none";
-  document.getElementById("loader").style.display = "block";
-}
+        function showPage() {
+          document.getElementById("content").style.display = "none";
+          document.getElementById("loader").style.display = "block";
+        }
 
-</script>
+        function numberWithCommas(x) {
+            return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+    </script>
     <meta charset="UTF-8">
     <title>Hecs Calculator</title>
 </head>
@@ -23,17 +34,17 @@ function showPage() {
 <div id="loader" class="loader center" style="display:none;"><!--    Loading...    --></div>
 <div id="content">
     <div class="center">
-    <h1 class="center_text">Hecs Repayment Calculator</h1>
-    <form method="POST" class="center_text">
-        {{ form.csrf_token }}
-        {{ form.annual_income(class_="form-control", placeholder="Annual Income") }}
-        <br>
-        {{ form.hecs_debt(class_="form-control",placeholder="Hecs Debt") }}
-        <br>
-        {{ form.weekly_voluntary_repayments(class_="form-control",placeholder="Weekly Voluntary Repayments") }}
-        <br><br>
-        {{ form.calculate(class_="button", onclick="return myFunction()") }}
-    </form>
+        <h1 class="center_text">Hecs Repayment Calculator</h1>
+        <form autocomplete="off" method="POST" class="center_text">
+            {{ form.csrf_token }}
+            {{ form.annual_income(class_="form-control", placeholder="Annual Income") }}
+            <br>
+            {{ form.hecs_debt(class_="form-control",placeholder="Hecs Debt") }}
+            <br>
+            {{ form.weekly_voluntary_repayments(class_="form-control",placeholder="Weekly Voluntary Repayments") }}
+            <br><br>
+            {{ form.calculate(class_="button", onclick="return myFunction()") }}
+        </form>
     </div>
     <div class="center">
         {% if display_output %}
@@ -47,13 +58,17 @@ function showPage() {
         <br>
         <!--  Show the user the raw stats  -->
         <p class="center_text">Approximate voluntary repayment length of: <strong>{{ display_strings[4] }}</strong></p>
-        <p class="center_text">Approximate involuntary repayment length of: <strong>{{ display_strings[5] }}</strong></p>
+        <p class="center_text">Approximate involuntary repayment length of: <strong>{{ display_strings[5] }}</strong>
+        </p>
 
         <br>
         <!--  Break the stats down for the user  -->
-        <p class="center_text">It is approximately <strong>{{ display_strings[6] }}</strong> and <strong>{{ display_strings[7] }}</strong> to make <strong>{{ display_strings[8] }}</strong> {{ display_strings[9] }}</p>
+        <p class="center_text">It is approximately <strong>{{ display_strings[6] }}</strong> and <strong>{{
+            display_strings[7] }}</strong> to make <strong>{{ display_strings[8] }}</strong> {{ display_strings[9] }}
+        </p>
         {% endif %}
     </div>
 </div>
 </body>
+
 </html>
