@@ -20,7 +20,7 @@ def home_page():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run('0.0.0.0')
 
 # PYTHON ANYWHERE WSGI CONFIG FILE SETUP
 # # This file contains the WSGI configuration required to serve up your

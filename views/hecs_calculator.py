@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from flask import render_template, Blueprint
+from markupsafe import Markup
 
 from forms import HecsDebtForm
 from static.Helper_Classes.UserHecsCalculations import UserHecsTax
@@ -19,15 +20,13 @@ hecs_calculator = Blueprint(blueprint_name, __name__)
 # 2.5) Find a way to display this to the user without just showing an error
 # 3) Class more stuff where appropriate
 # 4) Re-vamp the HTML / CSS to make the end user page be nicer and easier to understand
-# 5) Add a link on the home page that takes you to the HECS calculator = DONE
-# 6) Validate values entered into inputs (No negatives, nothing below bracket min?, is only numbers)
-
+# 6) Validate values entered into inputs (No negatives, nothing below bracket min?, is only numbers) | Done
 
 @hecs_calculator.route(f'/{blueprint_name}', methods=['GET', 'POST'])
 def _hecs_calculator():
     form = HecsDebtForm()
     display_strings = []
-    display_blank_output = False
+    display_output = False
 
     if form.validate_on_submit():
         # Clear display strings
@@ -45,39 +44,63 @@ def _hecs_calculator():
         user_hecs_tax = UserHecsTax(annual_income, income_threshold_brackets, yearly_indexation_rates)
         index_rate = user_hecs_tax.average_yearly_indexation_rate
 
-        involuntary_values, total_of_indexed_values = calculate_hecs_repayments(hecs_debt,
-                                                                                user_hecs_tax.average_yearly_indexation_rate,
-                                                                                user_hecs_tax.user_income_hecs_tax_amount,
-                                                                                0, False)
-        # Total indexed amount of debt
-        total_involuntary_index = (sum(total_of_indexed_values))
+        try:
+            involuntary_values, total_of_indexed_values = calculate_hecs_repayments(hecs_debt,
+                                                                                    user_hecs_tax.average_yearly_indexation_rate,
+                                                                                    user_hecs_tax.user_income_hecs_tax_amount,
+                                                                                    0, False)
+            # Total indexed amount of debt
+            total_involuntary_index = (sum(total_of_indexed_values))
 
-        voluntary_values, total_of_indexed_values = calculate_hecs_repayments(hecs_debt,
-                                                                              user_hecs_tax.average_yearly_indexation_rate,
-                                                                              user_hecs_tax.user_income_hecs_tax_amount,
-                                                                              monthly_repayments,
-                                                                              True)
+            voluntary_values, total_of_indexed_values = calculate_hecs_repayments(hecs_debt,
+                                                                                  user_hecs_tax.average_yearly_indexation_rate,
+                                                                                  user_hecs_tax.user_income_hecs_tax_amount,
+                                                                                  monthly_repayments,
+                                                                                  True)
 
-        total_voluntary_index = (sum(total_of_indexed_values))
-        # Append all strings that need to be displayed to the user to a list
-        display_strings.append(f"${annual_income:,}")
-        display_strings.append(f"${weekly_repayments:,.0f}")
-        display_strings.append(f"${hecs_debt:,}")
-        display_strings.append(f"{round(index_rate * 100, 2)}%")
+            total_voluntary_index = (sum(total_of_indexed_values))
+            # Append all strings that need to be displayed to the user to a list
+            # display_strings.append(f"Annual Income: <b>${annual_income:,}</b>")
+            display_strings.append(Markup(f"${annual_income:,}"))
+            display_strings.append(Markup(f"${hecs_debt:,}"))
+            display_strings.append(
+                Markup(
+                    f"${user_hecs_tax.user_income_hecs_tax_amount:,} ({user_hecs_tax.user_tax_bracket_tax_rate}%)"))
+            display_strings.append(Markup(f"${weekly_repayments:,.0f}"))
+            display_strings.append(Markup(f"{round(index_rate * 100, 2)}%"))
+            display_strings.append(Markup("<br>"))
+            display_strings.append(Markup(
+                f"Approximate voluntary repayment length of: <b>{int(len(voluntary_values) / 12)} years {len(voluntary_values) % 12} months</b> "
+                f"(${hecs_debt + total_involuntary_index:,.2f} indexed debt)"))
+            display_strings.append(Markup(
+                f"Approximate involuntary repayment length of: <b>{int(len(involuntary_values) / 12)} years {len(involuntary_values) % 12} months</b> "
+                f"(${hecs_debt + total_voluntary_index:,.2f} indexed debt)"))
+            display_strings.append(Markup("<br>"))
+            display_strings.append(
+                Markup(f"It is approximately <b>{len(involuntary_values) / len(voluntary_values):.2f}x</b> quicker "
+                       f"and <b>${total_involuntary_index - total_voluntary_index:,.2f} cheaper</b> "
+                       f"to make <b>${weekly_repayments} weekly payments</b> "
+                       f"(${weekly_repayments * 52:,.2f} Annually)"))
 
-        display_strings.append(f"{int(len(voluntary_values) / 12)} years {len(voluntary_values) % 12} months "
-                               f"(${hecs_debt + total_involuntary_index:,.2f} indexed debt)")
-        display_strings.append(f"{int(len(involuntary_values) / 12)} years {len(involuntary_values) % 12} months "
-                               f"(${hecs_debt + total_voluntary_index:,.2f} indexed debt)")
+        except RecursionError:
+            if annual_income < user_hecs_tax.tax_brackets_min:
+                display_strings.append(Markup(
+                    f"Your annual income of ${annual_income:,} is not high enough to pay mandatory tax on your HECS debt<br>"
+                    f"You should make voluntary contributions towards your HECS debt of at least "
+                    f"${(hecs_debt * index_rate) / 52:,.2f} per week (${hecs_debt * index_rate:,.2f} Annually) to ensure you cover the average annual indexation on your debt.<br>"
+                    f"A good general rule is to set aside enough to offset indexation and also pay a little extra off the loan, usually 2-5% of you annual income will cover this<br>"
+                    f"In this case, 2-5% of ${annual_income:,.2f} is ${annual_income * 0.02:,.2f}-${annual_income * 0.05:,.2f}"))
+            else:
+                display_strings.append(Markup(
+                    f"You do not earn enough to repay your HECS debt of ${hecs_debt:,}.<br>"
+                    f"Either <b>increase your annual salary</b> or <u>reduce your HECS debt</u><br>"
+                    f"You need to repay at least ${(hecs_debt * index_rate) / 52:,.2f} (${hecs_debt * index_rate:,.2f} Annually) "
+                    f"per week to negate the average annual indexation"))
 
-        display_strings.append(f"{len(involuntary_values) / len(voluntary_values):.2f}x quicker")
-        display_strings.append(f"${total_involuntary_index - total_voluntary_index:,.2f} cheaper")
-        display_strings.append(f"${weekly_repayments} weekly payments")
-        display_strings.append(f"(${weekly_repayments * 52:,.2f} Annually)")
+        display_output = True
 
-        display_blank_output = True
     return render_template(f"{blueprint_name}.html", form=form, display_strings=display_strings,
-                           display_output=display_blank_output)
+                           display_output=display_output)
 
 
 def calculate_hecs_repayments(hecs_debt, index_rate, mandatory_hecs_tax_repayment, voluntary_repayment,
@@ -105,7 +128,6 @@ def calculate_hecs_repayments(hecs_debt, index_rate, mandatory_hecs_tax_repaymen
         calculate_hecs_repayments(hecs_debt, index_rate, mandatory_hecs_tax_repayment, voluntary_repayment,
                                   includes_voluntary_payment,
                                   value_list, indexed_list)
-
     return value_list, indexed_list
 
 

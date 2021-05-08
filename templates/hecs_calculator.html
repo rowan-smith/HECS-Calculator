@@ -35,41 +35,88 @@
 <div id="content">
     <div class="center">
         <h1 class="center_text">Hecs Repayment Calculator</h1>
-<!--        <form autocomplete="off" method="POST" class="center_text">-->
+        <!--        for some reason, setting autocomplete to off invalidates the CSRF tokens and makes the prod site error out-->
+        <!--        <form autocomplete="off" method="POST" class="center_text">-->
+
+<!--        <p>-->
+<!--            {{ form.errors }}-->
+<!--        </p>-->
         <form method="POST" class="center_text">
             {{ form.csrf_token }}
-            {{ form.annual_income(class_="form-control", placeholder="Annual Income") }}
-            <br>
-            {{ form.hecs_debt(class_="form-control",placeholder="Hecs Debt") }}
-            <br>
-            {{ form.weekly_voluntary_repayments(class_="form-control",placeholder="Weekly Voluntary Repayments") }}
-            <br><br>
-            {{ form.calculate(class_="button", onclick="return myFunction()") }}
+            <table style="border-collapse: collapse" class="center">
+                <tbody>
+                <!--Error message row-->
+                <tr>
+                    <td>
+                        {{ form.errors['annual_income']|replace('"','')|replace('[','')|replace(']','')|safe }}
+                    </td>
+                    <td>
+                        {{ form.errors['hecs_debt']|replace('"','')|replace('[','')|replace(']','')|safe }}
+                    </td>
+                    <td>
+                        {{
+                        form.errors['weekly_voluntary_repayments']|replace('"','')|replace('[','')|replace(']','')|safe
+                        }}
+                    </td>
+                </tr>
+
+                <!--Form entry row-->
+                <tr>
+                    <td>
+                        {{ form.annual_income(class_="form-control", placeholder="Annual Income", type="number",
+                        onkeydown="return event.keyCode !== 69 && event.keyCode !== 189") }}
+                    </td>
+                    <td>
+                        {{ form.hecs_debt(class_="form-control",placeholder="Hecs Debt", type="number",
+                        onkeydown="return event.keyCode !== 69 && event.keyCode !== 189") }}
+                    </td>
+                    <td>
+                        {{ form.weekly_voluntary_repayments(class_="form-control",
+                        placeholder="Weekly Voluntary Repayments", type="number", onkeydown="return event.keyCode !== 69
+                        && event.keyCode !== 189") }}
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            {{ form.calculate(class_="button") }}
+<!--            {{ form.calculate(class_="button", onclick="return myFunction()") }}-->
         </form>
+
     </div>
+    {% if display_output %}
     <div class="center">
-        {% if display_output %}
-
-        <!--    Show the user the input they used-->
-        <p class="center_text">Annual Income: <strong>{{ display_strings[0] }}</strong></p>
-        <p class="center_text">Weekly Voluntary Repayments: <strong>{{ display_strings[1] }}</strong></p>
-        <p class="center_text">HECS Debt: <strong>{{ display_strings[2] }}</strong></p>
-        <p class="center_text">Average Indexation: <strong>{{ display_strings[3] }}</strong></p>
-
-        <br>
-        <!--  Show the user the raw stats  -->
-        <p class="center_text">Approximate voluntary repayment length of: <strong>{{ display_strings[4] }}</strong></p>
-        <p class="center_text">Approximate involuntary repayment length of: <strong>{{ display_strings[5] }}</strong>
-        </p>
-
-        <br>
-        <!--  Break the stats down for the user  -->
-        <p class="center_text">It is approximately <strong>{{ display_strings[6] }}</strong> and <strong>{{
-            display_strings[7] }}</strong> to make <strong>{{ display_strings[8] }}</strong> {{ display_strings[9] }}
-        </p>
-        {% endif %}
+        <table class="information_table">
+            <tbody>
+            <tr>
+                <td class="center_text table_header"><b>Annual Income</b></td>
+                <td class="center_text table_header"><b>HECS Debt</b></td>
+                <td class="center_text table_header"><b>Annual Mandatory Repayments</b></td>
+                <td class="center_text table_header"><b>Weekly Voluntary Repayments</b></td>
+                <td class="center_text table_header"><b>Average Indexation Rate</b></td>
+            </tr>
+            <tr>
+                <td class="center_text">{{ display_strings[0] }}</td>
+                <td class="center_text">{{ display_strings[1] }}</td>
+                <td class="center_text">{{ display_strings[2] }}</td>
+                <td class="center_text">{{ display_strings[3] }}</td>
+                <td class="center_text">{{ display_strings[4] }}</td>
+            </tr>
+            </tbody>
+        </table>
     </div>
+
+    <div class="center">
+        <table style="border-collapse: collapse" class="information_table">
+            <tbody>
+            {% for string in display_strings[5:] %}
+            <tr>
+                <td class="center_text">{{ string }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
 </div>
 </body>
-
 </html>

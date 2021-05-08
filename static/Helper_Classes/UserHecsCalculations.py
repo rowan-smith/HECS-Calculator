@@ -16,10 +16,10 @@ class UserHecsTax:
         self._tax_brackets_rates: list = [number[2] for number in income_threshold_brackets]
 
         # max and min tax brackets
-        self._tax_bracket_max: int = max(self._tax_brackets)
-        self._tax_bracket_min: int = min(self._tax_brackets)
-        self._tax_bracket_rate_max: int = max(self._tax_brackets_rates)
-        self._tax_bracket_rate_min: int = min(self._tax_brackets_rates)
+        self._tax_brackets_max: int = max(self._tax_brackets)
+        self.tax_brackets_min: int = min(self._tax_brackets)
+        self._tax_brackets_rate_min: int = min(self._tax_brackets_rates)
+        self._tax_brackets_rate_max: int = max(self._tax_brackets_rates)
 
         # indexation rate
         self.yearly_indexation_rates = yearly_indexation_rates
@@ -40,17 +40,17 @@ class UserHecsTax:
                 self.user_tax_bracket_tax_rate = bracket[2]
 
             # If income is more than the max bracket, set the tax rate to the max tax rate
-            elif self.user_annual_income > self._tax_bracket_max:
-                self.user_tax_bracket_tax_rate = self._tax_bracket_rate_max
+            elif self.user_annual_income > self._tax_brackets_max:
+                self.user_tax_bracket_tax_rate = self._tax_brackets_rate_max
 
             # If income is less than the min bracket, set the tax rate to the min tax rate
-            elif self.user_annual_income < self._tax_bracket_min:
-                self.user_tax_bracket_tax_rate = self._tax_bracket_rate_min
+            elif self.user_annual_income < self.tax_brackets_min:
+                self.user_tax_bracket_tax_rate = self._tax_brackets_rate_min
 
     def _calculate_user_hecs_tax_amount(self):
         # If user income is above the max bracket amount, set the tax amount based on the max tax rate
-        if self.user_annual_income > self._tax_bracket_max:
-            self.user_income_hecs_tax_amount = self.user_annual_income / (100 / self._tax_bracket_rate_max)
+        if self.user_annual_income > self._tax_brackets_max:
+            self.user_income_hecs_tax_amount = self.user_annual_income / (100 / self._tax_brackets_rate_max)
 
         else:
             bracket_tax_rate = self.user_tax_bracket_tax_rate

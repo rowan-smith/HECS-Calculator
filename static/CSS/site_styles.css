@@ -12,9 +12,8 @@ body {
 	position: relative;
 	box-sizing: border-box;
 	height: auto;
-	width: 35vw;
-	padding: 10px;
-	margin-top: 10px;
+	width: 30vw;
+	padding: 5px;
 	font-size: 20px;
 }
 
@@ -43,8 +42,8 @@ body {
 }
 
 .loader {
-  border: 16px solid #f3f3f3; /* Light grey */
-  border-top: 16px solid #4CAF50; /* Blue */
+  border: 16px solid #f3f3f3;
+  border-top: 16px solid #4CAF50;
   border-bottom: 16px solid #4CAF50;
   border-radius: 50%;
   width: 120px;
@@ -55,4 +54,22 @@ body {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+
+
+.information_table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0.15em;
+}
+
+.information_table tr:nth-child(even) {
+		background:#EEEEEE;
+}
+
+.table_header {
+    background-color: black;
+    color: white;
+
 }
