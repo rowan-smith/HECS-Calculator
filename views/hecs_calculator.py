@@ -16,9 +16,7 @@ hecs_calculator = Blueprint(blueprint_name, __name__)
 
 # TODO:
 # 1) Add CSV file writing to store the three metrics that users input
-# 2) Fix annual salary below the minimum repayment threshold causing a max recursion depth error
-# 2.5) Find a way to display this to the user without just showing an error
-# 3) Class more stuff where appropriate
+# 2) Handle blank inputs | Done
 # 4) Re-vamp the HTML / CSS to make the end user page be nicer and easier to understand
 # 6) Validate values entered into inputs (No negatives, nothing below bracket min?, is only numbers) | Done
 
