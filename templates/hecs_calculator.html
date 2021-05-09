@@ -104,9 +104,9 @@
             </tbody>
         </table>
     </div>
-
+    <br>
     <div class="center">
-        <table style="border-collapse: collapse" class="information_table">
+        <table style="border-collapse: collapse" class="calculation_table">
             <tbody>
             {% for string in display_strings[5:] %}
             <tr>
@@ -115,6 +115,14 @@
             {% endfor %}
             </tbody>
         </table>
+    </div>
+    {% else %}
+    <div class="center_text error_text">
+        {% for string in error_strings %}
+        <p>
+            {{ string }}
+        </p>
+        {% endfor %}
     </div>
     {% endif %}
 </div>

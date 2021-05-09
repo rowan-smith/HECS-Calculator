@@ -21,6 +21,10 @@ body {
     text-align: center;
 }
 
+.error_text {
+    line-height: 50px;
+}
+
 .button {
   background-color: #4CAF50; /* Green */
   border: none;
@@ -56,8 +60,6 @@ body {
   100% { transform: rotate(360deg); }
 }
 
-
-
 .information_table {
     width: 100%;
     border-collapse: separate;
@@ -72,4 +74,10 @@ body {
     background-color: black;
     color: white;
 
+}
+
+.calculation_table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0.15em;
 }
