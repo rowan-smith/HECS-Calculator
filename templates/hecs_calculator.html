@@ -26,6 +26,7 @@
             return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
 
+
     </script>
 
     <meta charset="UTF-8">
@@ -39,9 +40,9 @@
         <!--        for some reason, setting autocomplete to off invalidates the CSRF tokens and makes the prod site error out-->
         <!--        <form autocomplete="off" method="POST" class="center_text">-->
 
-<!--        <p>-->
-<!--            {{ form.errors }}-->
-<!--        </p>-->
+        <!--        <p>-->
+        <!--            {{ form.errors }}-->
+        <!--        </p>-->
         <form method="POST" class="center_text">
             {{ form.csrf_token }}
             <table style="border-collapse: collapse" class="center">
@@ -80,7 +81,7 @@
                 </tbody>
             </table>
             {{ form.calculate(class_="button") }}
-<!--            {{ form.calculate(class_="button", onclick="return myFunction()") }}-->
+            <!--            {{ form.calculate(class_="button", onclick="return myFunction()") }}-->
         </form>
 
     </div>
@@ -90,16 +91,21 @@
             <tbody>
             <tr>
                 <td class="center_text table_header"><b>Annual Income</b></td>
-                <td class="center_text table_header"><b>HECS Debt</b></td>
-                <td class="center_text table_header"><b>Annual Mandatory Repayments</b></td>
-                <td class="center_text table_header"><b>Weekly Voluntary Repayments</b></td>
-                <td class="center_text table_header"><b>Average Indexation Rate</b></td>
+                <td class="center_text">{{ display_strings[0] }}</td>
             </tr>
             <tr>
-                <td class="center_text">{{ display_strings[0] }}</td>
+                <td class="center_text table_header"><b>HECS Debt</b></td>
                 <td class="center_text">{{ display_strings[1] }}</td>
+            <tr>
+                <td class="center_text table_header"><b>Annual Mandatory Repayments</b></td>
                 <td class="center_text">{{ display_strings[2] }}</td>
+            </tr>
+            <tr>
+                <td class="center_text table_header"><b>Weekly Voluntary Repayments</b></td>
                 <td class="center_text">{{ display_strings[3] }}</td>
+            </tr>
+            <tr>
+                <td class="center_text table_header"><b>Average Indexation Rate</b></td>
                 <td class="center_text">{{ display_strings[4] }}</td>
             </tr>
             </tbody>
@@ -107,15 +113,11 @@
     </div>
     <br>
     <div class="center">
-        <table style="border-collapse: collapse" class="calculation_table">
-            <tbody>
             {% for string in display_strings[5:] %}
-            <tr>
-                <td class="center_text">{{ string }}</td>
-            </tr>
+            <ul>
+                <li>{{ string }}</li>
+            </ul>
             {% endfor %}
-            </tbody>
-        </table>
     </div>
     {% else %}
     <div class="center_text error_text">
