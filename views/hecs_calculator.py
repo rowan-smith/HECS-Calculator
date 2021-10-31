@@ -19,8 +19,15 @@ blueprint_name = "hecs_calculator"
 # use creds to create a client to interact with the Google Drive API
 scope = ['https://spreadsheets.google.com/feeds',
          'https://www.googleapis.com/auth/drive']
-credentials = ServiceAccountCredentials.from_json_keyfile_name('static/client_secret.json', scope)
+
+# WEB VERSION
+credentials = ServiceAccountCredentials.from_json_keyfile_name('Nick_Barty_Website/static/client_secret.json', scope)
+
+# DEV VERSION
+# credentials = ServiceAccountCredentials.from_json_keyfile_name('static/client_secret.json', scope)
+
 client = gspread.authorize(credentials)
+
 # Find a workbook by name and open the first sheet
 sheet = client.open("Hecs Calculator Log").sheet1
 # ====== GOOGLE SHEET CONNECTION DEFINED ABOVE TO SPEED UP RESPONSE TIME TO THE USER ======
