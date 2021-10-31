@@ -3,7 +3,7 @@ from datetime import datetime
 import gspread
 import requests
 from bs4 import BeautifulSoup
-from flask import render_template, Blueprint, request
+from flask import render_template, Blueprint
 from markupsafe import Markup
 from oauth2client.service_account import ServiceAccountCredentials
 
@@ -118,7 +118,7 @@ def _hecs_calculator():
 
             g_sheet_new_row.extend([display_strings[2], display_strings[4], year_difference,
                                     f"${total_involuntary_index - total_voluntary_index:,.2f}",
-                                    date_time, timezone, request.remote_addr])
+                                    date_time, timezone])
 
         except RecursionError:
             if annual_income < user_hecs_tax.tax_brackets_min:
@@ -139,7 +139,7 @@ def _hecs_calculator():
 
             g_sheet_new_row.extend(["Could Not Calculate", "Could Not Calculate", "Could Not Calculate",
                                     "Could Not Calculate",
-                                    date_time, timezone, request.remote_addr])
+                                    date_time, timezone])
 
     sheet.append_row(g_sheet_new_row, value_input_option='USER_ENTERED')
 
