@@ -10,4 +10,3 @@ class ApplicationConfig(object):
 
     if secrets:
         WTF_CSRF_SECRET_KEY = secrets.token_hex()
-

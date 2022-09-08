@@ -1,36 +1,17 @@
 from datetime import datetime
 
-import gspread
 import requests
 from bs4 import BeautifulSoup
 from flask import render_template, Blueprint
 from markupsafe import Markup
-from oauth2client.service_account import ServiceAccountCredentials
 
-from forms import HecsDebtForm
-from static.Helper_Classes.UserHecsCalculations import UserHecsTax
+from forms.hecs_debt_form import HecsDebtForm
+from utils.UserHecsCalculations import UserHecsTax
 
 ATO_HELP_THRESHOLD_URL = "https://www.ato.gov.au/Rates/HELP,-TSL-and-SFSS-repayment-thresholds-and-rates/"
 ATO_HELP_INDEXATION_URL = "https://www.ato.gov.au/Rates/Study-and-training-loan-indexation-rates/"
 
 blueprint_name = "hecs_calculator"
-
-# ====== GOOGLE SHEET CONNECTION DEFINED BELOW TO SPEED UP RESPONSE TIME TO THE USER ======
-# use creds to create a client to interact with the Google Drive API
-scope = ['https://spreadsheets.google.com/feeds',
-         'https://www.googleapis.com/auth/drive']
-
-# WEB VERSION
-credentials = ServiceAccountCredentials.from_json_keyfile_name('Nick_Barty_Website/static/client_secret.json', scope)
-
-# DEV VERSION
-# credentials = ServiceAccountCredentials.from_json_keyfile_name('static/client_secret.json', scope)
-
-client = gspread.authorize(credentials)
-
-# Find a workbook by name and open the first sheet
-sheet = client.open("Hecs Calculator Log").sheet1
-# ====== GOOGLE SHEET CONNECTION DEFINED ABOVE TO SPEED UP RESPONSE TIME TO THE USER ======
 
 hecs_calculator = Blueprint(blueprint_name, __name__)
 
@@ -40,14 +21,9 @@ def _hecs_calculator():
     form = HecsDebtForm()
     display_strings = []
     error_strings = []
-    g_sheet_new_row = []
     display_output = False
 
     if form.validate_on_submit():
-        # Clear display strings
-        # display_strings = []
-        # error_strings = []
-
         income_threshold_brackets = get_values_from_ato_table(ATO_HELP_THRESHOLD_URL)
         yearly_indexation_rates = get_values_from_ato_table(ATO_HELP_INDEXATION_URL, 2)
 
@@ -60,11 +36,7 @@ def _hecs_calculator():
         user_hecs_tax = UserHecsTax(annual_income, income_threshold_brackets, yearly_indexation_rates)
         index_rate = user_hecs_tax.average_yearly_indexation_rate
 
-        # Prepare google sheet entry data
-        g_sheet_new_row = [annual_income, hecs_debt, weekly_repayments]
         time_split = str(datetime.astimezone(datetime.now())).split(".")
-        date_time = time_split[0]
-        timezone = f"'{time_split[1][6:]}"  # Format with apostrophe so no formula is applied in google sheets
 
         try:
             involuntary_values, total_of_indexed_values = calculate_hecs_repayments(hecs_debt,
@@ -116,9 +88,6 @@ def _hecs_calculator():
                        f"after <b>{int(len(involuntary_values) / 12)} years</b></span>, compared to <span style='color:red'>$0 if you make no voluntary repayments</span>"))
             display_output = True
 
-            g_sheet_new_row.extend([display_strings[2], display_strings[4], year_difference,
-                                    f"${total_involuntary_index - total_voluntary_index:,.2f}",
-                                    date_time, timezone])
 
         except RecursionError:
             if annual_income < user_hecs_tax.tax_brackets_min:
@@ -136,12 +105,6 @@ def _hecs_calculator():
                     f"at a minimum to negate average annual loan indexation<br><br>"
                     f"Your specified weekly voluntary repayments of <b>${weekly_repayments:,.2f}</b> total <b>${weekly_repayments * 52:,.2f}</b> annually<br><br>"
                     f"Choosing to <b>not make any voluntary repayments</b> will <b>exponentially increase the amount of time</b> it takes you to pay off your debt!"))
-
-            g_sheet_new_row.extend(["Could Not Calculate", "Could Not Calculate", "Could Not Calculate",
-                                    "Could Not Calculate",
-                                    date_time, timezone])
-
-    sheet.append_row(g_sheet_new_row, value_input_option='USER_ENTERED')
 
     return render_template(f"{blueprint_name}.html", form=form, display_strings=display_strings,
                            error_strings=error_strings, display_output=display_output)

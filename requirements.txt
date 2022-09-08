@@ -1,0 +1,4 @@
+beautifulsoup4~=4.11.1
+starlette[jinja2]~=0.20.4
+starlette-wtf~=0.4.3
+uvicorn~=0.18.3
